@@ -3,16 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Умные счетчики</title>
+    <title>Умные счетчики v3.1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Стили из предыдущей версии - они безопасны */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
-        /* ... остальные стили ... */
+        
+        .header { background: white; border-radius: 20px; padding: 25px 35px; margin-bottom: 25px; 
+                 box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; justify-content: space-between; }
+        .logo h1 { font-size: 28px; color: #1e3c72; }
+        .logo span { color: #2a5298; font-weight: 300; }
+        .admin-badge { background: #1e3c72; color: white; padding: 10px 25px; border-radius: 30px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 25px; 
+                     border-radius: 30px; cursor: pointer; margin-left: 15px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 20px; padding: 30px; text-align: center; 
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .stat-icon { font-size: 45px; margin-bottom: 15px; }
+        .stat-value { font-size: 42px; font-weight: bold; color: #1e3c72; }
+        .stat-label { color: #666; font-size: 16px; }
+        
+        .export-buttons { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .export-btn { padding: 12px 25px; border: none; border-radius: 30px; font-weight: 500; 
+                     cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .export-btn.excel { background: #28a745; color: white; }
+        .export-btn.pdf { background: #dc3545; color: white; }
+        .export-btn.refresh { background: #17a2b8; color: white; }
+        
+        .table-container { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; }
+        .table-header { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+        .meters-table { width: 100%; border-collapse: collapse; }
+        .meters-table th { text-align: left; padding: 15px 10px; background: #1e3c72; color: white; }
+        .meters-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; }
+        .device-id { background: #e3f2fd; color: #1e3c72; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+        .device-id:hover { background: #bbdefb; }
+        .online { color: #28a745; font-weight: 500; }
+        .offline { color: #dc3545; font-weight: 500; }
+        .price-badge { background: #ffc107; color: #1e3c72; padding: 3px 8px; border-radius: 15px; font-size: 12px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 1200px; width: 95%; 
+                        max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-tabs { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .tab-btn { padding: 10px 20px; border: none; border-radius: 30px; background: #e0e0e0; cursor: pointer; }
+        .tab-btn.active { background: #1e3c72; color: white; }
+        .close-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; 
+                    border-radius: 30px; cursor: pointer; }
+        
+        .chart-container { height: 300px; margin: 20px 0; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .data-table th { background: #4CAF50; color: white; padding: 10px; }
+        .data-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        
+        .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                        display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 50px; border-radius: 30px; width: 100%; max-width: 450px; }
+        .login-title { text-align: center; margin-bottom: 30px; }
+        .login-title h2 { color: #1e3c72; font-size: 32px; }
+        .login-input { width: 100%; padding: 15px 20px; margin-bottom: 20px; 
+                      border: 2px solid #e0e0e0; border-radius: 15px; font-size: 16px; }
+        .login-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                    color: white; border: none; border-radius: 15px; font-size: 18px; cursor: pointer; }
+        
+        .loading { text-align: center; padding: 30px; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #1e3c72; border-radius: 50%;
+                  width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .last-seen { font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -40,7 +105,6 @@
             </div>
         </div>
 
-        <!-- Статистика -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
@@ -64,7 +128,12 @@
             </div>
         </div>
 
-        <!-- Таблица счетчиков -->
+        <div class="export-buttons">
+            <button class="export-btn excel" onclick="exportToExcel()">📥 Excel</button>
+            <button class="export-btn pdf" onclick="exportToPDF()">📥 PDF</button>
+            <button class="export-btn refresh" onclick="loadData()">🔄 Обновить</button>
+        </div>
+
         <div class="table-container">
             <div class="table-header">
                 <h3>📋 Показания счетчиков</h3>
@@ -76,7 +145,6 @@
                         <th>ID</th>
                         <th>Место</th>
                         <th>Описание</th>
-                        <th>Начальные</th>
                         <th>Текущие</th>
                         <th>Потреблено</th>
                         <th>Цена</th>
@@ -86,19 +154,15 @@
                     </tr>
                 </thead>
                 <tbody id="metersTableBody">
-                    <tr><td colspan="10" class="loading"><div class="spinner"></div>Загрузка...</td></tr>
+                    <tr><td colspan="9" class="loading"><div class="spinner"></div>Загрузка...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // ⚠️ ВАЖНО: ЗДЕСЬ НЕТ ТОКЕНОВ!
-        // API_URL нужно будет указать при загрузке на GitHub Pages
-        const API_URL = 'https://functions.yandexcloud.net/d4evtdt6oq7jnc168ke0'; // ЗАМЕНИТЕ!
-        
+        const API_URL = 'https://functions.yandexcloud.net/d4evtdt6oq7jnc168ke0';
         let metersData = null;
-        let currentDeviceId = null;
         let chart = null;
 
         function login() {
@@ -108,6 +172,7 @@
             if (username === 'admin' && password === 'admin123') {
                 localStorage.setItem('auth', btoa('admin:admin123'));
                 loadData();
+                setInterval(loadData, 60000);
             } else {
                 document.getElementById('loginError').style.display = 'block';
                 document.getElementById('loginError').textContent = 'Неверный логин или пароль';
@@ -118,6 +183,15 @@
             localStorage.removeItem('auth');
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('mainContent').style.display = 'none';
+        }
+
+        function checkAuth() {
+            if (localStorage.getItem('auth')) {
+                loadData();
+                setInterval(loadData, 60000);
+            } else {
+                document.getElementById('loginOverlay').style.display = 'flex';
+            }
         }
 
         async function loadData() {
@@ -189,10 +263,9 @@
                     <td><span class="device-id" onclick="showDeviceDetails('${id}')">${id}</span></td>
                     <td>${dev.location || '-'}</td>
                     <td>${dev.description || '-'}</td>
-                    <td>${(dev.initial || 0).toFixed(1)}</td>
                     <td><b>${(dev.current || 0).toFixed(1)}</b></td>
                     <td>${(dev.consumed || 0).toFixed(1)}</td>
-                    <td>${(dev.price || 5).toFixed(2)} ₽</td>
+                    <td><span class="price-badge">${(dev.price || 5).toFixed(2)} ₽</span></td>
                     <td><b>${cost.toFixed(0)} ₽</b></td>
                     <td><span class="${isOnline ? 'online' : 'offline'}">${isOnline ? '● Онлайн' : '○ Офлайн'}</span></td>
                     <td>${minutesAgo} мин</td>
@@ -202,14 +275,72 @@
             document.getElementById('metersTableBody').innerHTML = html;
         }
 
-        function showDeviceDetails(deviceId) {
-            currentDeviceId = deviceId;
-            // ... код модального окна как в предыдущей версии ...
+        function exportToExcel() {
+            if (!metersData) return;
+            
+            const data = [['ID', 'Место', 'Описание', 'Текущие', 'Потреблено', 'Цена', 'Сумма', 'Статус']];
+            
+            for (let id in metersData.devices) {
+                const dev = metersData.devices[id];
+                const cost = (dev.consumed || 0) * (dev.price || 5);
+                
+                data.push([
+                    id,
+                    dev.location || '-',
+                    dev.description || '-',
+                    (dev.current || 0).toFixed(1),
+                    (dev.consumed || 0).toFixed(1),
+                    (dev.price || 5).toFixed(2),
+                    cost.toFixed(0),
+                    'Активен'
+                ]);
+            }
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, 'Счетчики');
+            XLSX.writeFile(wb, `meters_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // Автозагрузка и обновление
+        function exportToPDF() {
+            if (!metersData) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            doc.setFontSize(18);
+            doc.setTextColor(30, 60, 114);
+            doc.text('Отчет по счетчикам', 14, 20);
+            doc.setFontSize(10);
+            doc.text('Дата: ' + new Date().toLocaleString('ru-RU'), 14, 28);
+            
+            const tableData = [];
+            for (let id in metersData.devices) {
+                const dev = metersData.devices[id];
+                const cost = (dev.consumed || 0) * (dev.price || 5);
+                
+                tableData.push([
+                    id,
+                    dev.location || '-',
+                    dev.description || '-',
+                    (dev.current || 0).toFixed(1),
+                    (dev.consumed || 0).toFixed(1),
+                    (dev.price || 5).toFixed(2),
+                    cost.toFixed(0)
+                ]);
+            }
+            
+            doc.autoTable({
+                head: [['ID', 'Место', 'Описание', 'Текущие', 'Потреблено', 'Цена', 'Сумма']],
+                body: tableData,
+                startY: 35,
+                headStyles: { fillColor: [30, 60, 114] }
+            });
+            
+            doc.save(`meters_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
         checkAuth();
-        setInterval(loadData, 60000); // Каждую минуту
     </script>
 </body>
 </html>
