@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Умные счетчики</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Стили из предыдущей версии - они безопасны */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        /* ... остальные стили ... */
+    </style>
+</head>
+<body>
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-title">
+                <h2>🔐 Вход в систему</h2>
+                <p>Учет электроэнергии</p>
+            </div>
+            <input type="text" class="login-input" id="loginUsername" placeholder="Логин" value="admin">
+            <input type="password" class="login-input" id="loginPassword" placeholder="Пароль" value="admin123">
+            <button class="login-btn" onclick="login()">Войти</button>
+            <div style="color: red; text-align: center; margin-top: 15px; display: none;" id="loginError"></div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent" style="display: none;">
+        <div class="header">
+            <div class="logo">
+                <h1>⚡ УМНЫЕ СЧЕТЧИКИ <span>| Панель управления</span></h1>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <span class="admin-badge" id="liveStatus">🟢 Онлайн</span>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalConsumed">0</div>
+                <div class="stat-label">Всего потреблено (кВт·ч)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" id="totalCost">0</div>
+                <div class="stat-label">На сумму (₽)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔌</div>
+                <div class="stat-value" id="totalDevices">0</div>
+                <div class="stat-label">Всего счетчиков</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="onlineDevices">0</div>
+                <div class="stat-label">Онлайн</div>
+            </div>
+        </div>
+
+        <!-- Таблица счетчиков -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>📋 Показания счетчиков</h3>
+                <span id="lastUpdate">Загрузка...</span>
+            </div>
+            <table class="meters-table" id="metersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Место</th>
+                        <th>Описание</th>
+                        <th>Начальные</th>
+                        <th>Текущие</th>
+                        <th>Потреблено</th>
+                        <th>Цена</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                        <th>Обновлено</th>
+                    </tr>
+                </thead>
+                <tbody id="metersTableBody">
+                    <tr><td colspan="10" class="loading"><div class="spinner"></div>Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ ВАЖНО: ЗДЕСЬ НЕТ ТОКЕНОВ!
+        // API_URL нужно будет указать при загрузке на GitHub Pages
+        const API_URL = 'https://functions.yandexcloud.net/d4evtdt6oq7jnc168ke0'; // ЗАМЕНИТЕ!
+        
+        let metersData = null;
+        let currentDeviceId = null;
+        let chart = null;
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                localStorage.setItem('auth', btoa('admin:admin123'));
+                loadData();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginError').textContent = 'Неверный логин или пароль';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('auth');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch(API_URL, {
+                    headers: {
+                        'Authorization': 'Basic ' + localStorage.getItem('auth')
+                    }
+                });
+                
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+                
+                const data = await response.json();
+                metersData = data;
+                updateDashboard(data);
+                
+                document.getElementById('lastUpdate').textContent = 
+                    'Обновлено: ' + new Date().toLocaleString('ru-RU');
+                document.getElementById('liveStatus').textContent = '🟢 Онлайн ' + new Date().toLocaleTimeString();
+                
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('loginOverlay').style.display = 'none';
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('liveStatus').textContent = '🔴 Ошибка';
+            }
+        }
+
+        function updateDashboard(data) {
+            let totalConsumed = 0;
+            let totalCost = 0;
+            let online = 0;
+            const now = new Date();
+            
+            for (let id in data.devices) {
+                const dev = data.devices[id];
+                totalConsumed += dev.consumed || 0;
+                totalCost += (dev.consumed || 0) * (dev.price || 5);
+                
+                const lastSeen = new Date(dev.timestamp || 0);
+                if (now - lastSeen < 30 * 60 * 1000) online++;
+            }
+            
+            document.getElementById('totalConsumed').textContent = totalConsumed.toFixed(1);
+            document.getElementById('totalCost').textContent = totalCost.toFixed(0);
+            document.getElementById('totalDevices').textContent = Object.keys(data.devices).length || 0;
+            document.getElementById('onlineDevices').textContent = online;
+            
+            updateTable(data.devices || {});
+        }
+
+        function updateTable(devices) {
+            let html = '';
+            const now = new Date();
+            
+            for (let id in devices) {
+                const dev = devices[id];
+                const cost = (dev.consumed || 0) * (dev.price || 5);
+                
+                const lastSeen = new Date(dev.timestamp || 0);
+                const isOnline = (now - lastSeen) < 30 * 60 * 1000;
+                const minutesAgo = Math.round((now - lastSeen) / 60000);
+                
+                html += `<tr>
+                    <td><span class="device-id" onclick="showDeviceDetails('${id}')">${id}</span></td>
+                    <td>${dev.location || '-'}</td>
+                    <td>${dev.description || '-'}</td>
+                    <td>${(dev.initial || 0).toFixed(1)}</td>
+                    <td><b>${(dev.current || 0).toFixed(1)}</b></td>
+                    <td>${(dev.consumed || 0).toFixed(1)}</td>
+                    <td>${(dev.price || 5).toFixed(2)} ₽</td>
+                    <td><b>${cost.toFixed(0)} ₽</b></td>
+                    <td><span class="${isOnline ? 'online' : 'offline'}">${isOnline ? '● Онлайн' : '○ Офлайн'}</span></td>
+                    <td>${minutesAgo} мин</td>
+                </tr>`;
+            }
+            
+            document.getElementById('metersTableBody').innerHTML = html;
+        }
+
+        function showDeviceDetails(deviceId) {
+            currentDeviceId = deviceId;
+            // ... код модального окна как в предыдущей версии ...
+        }
+
+        // Автозагрузка и обновление
+        checkAuth();
+        setInterval(loadData, 60000); // Каждую минуту
+    </script>
+</body>
+</html>
