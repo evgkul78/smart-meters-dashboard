@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "release_notes": "Первая версия системы",
+  "firmware": "firmware_v1.0.0.bin",
+  "min_version": "1.0.0",
+  "critical": false,
+  "release_date": "2026-03-07"
+}
