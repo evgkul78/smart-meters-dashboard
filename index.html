@@ -469,13 +469,13 @@
                 const dev = devices[id];
                 const location = dev.location || '';
                 
-                if (location.includes('Москва')) {
+                if (location.includes('Город-1')) {
                     mskCount++;
                     mskConsumed += dev.consumed || 0;
-                } else if (location.includes('Санкт-Петербург') || location.includes('Питер')) {
+                } else if (location.includes('Город-2') || location.includes('Питер')) {
                     spbCount++;
                     spbConsumed += dev.consumed || 0;
-                } else if (location.includes('Казань')) {
+                } else if (location.includes('Город-3')) {
                     kznCount++;
                     kznConsumed += dev.consumed || 0;
                 }
