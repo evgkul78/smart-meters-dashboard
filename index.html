@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Умные счетчики | Мониторинг электроэнергии</title>
+    <!-- Библиотеки для Excel и PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
+        /* ОСНОВНЫЕ СТИЛИ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -26,7 +28,7 @@
             margin: 0 auto;
         }
 
-        /* Шапка */
+        /* ШАПКА */
         .header {
             background: white;
             border-radius: 20px;
@@ -56,11 +58,12 @@
             font-weight: 500;
         }
 
-        /* Кнопки экспорта */
+        /* КНОПКИ ЭКСПОРТА */
         .export-buttons {
             display: flex;
             gap: 15px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
         }
 
         .export-btn {
@@ -94,7 +97,7 @@
             color: white;
         }
 
-        /* Таблица */
+        /* ТАБЛИЦА */
         .table-container {
             background: white;
             border-radius: 20px;
@@ -107,6 +110,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .table-title {
@@ -170,11 +175,6 @@
 
         .location-cell {
             max-width: 250px;
-        }
-
-        .location-text {
-            font-weight: 500;
-            color: #1e293b;
         }
 
         .description-text {
@@ -270,7 +270,7 @@
 </head>
 <body>
     <div class="container">
-        <!-- Шапка -->
+        <!-- ШАПКА САЙТА -->
         <div class="header">
             <div class="logo">
                 <h1>⚡ УМНЫЕ СЧЕТЧИКИ <span>| Мониторинг электроэнергии</span></h1>
@@ -280,7 +280,7 @@
             </div>
         </div>
 
-        <!-- Кнопки экспорта -->
+        <!-- КНОПКИ ЭКСПОРТА -->
         <div class="export-buttons">
             <button class="export-btn excel" onclick="exportToExcel()">
                 <span>📥</span> Скачать Excel (все показания)
@@ -289,11 +289,11 @@
                 <span>📥</span> Скачать PDF (все показания)
             </button>
             <button class="export-btn" onclick="exportMonthlyReport()">
-                <span>📊</span> Отчет за месяц
+                <span>📊</span> Отчет за текущий месяц
             </button>
         </div>
 
-        <!-- Таблица счетчиков -->
+        <!-- ТАБЛИЦА СЧЕТЧИКОВ -->
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">📋 Текущие показания счетчиков</div>
@@ -330,11 +330,18 @@
     </div>
 
     <script>
+        // ============================================
+        // НАСТРОЙКИ (НЕ МЕНЯТЬ!)
+        // ============================================
         const API_URL = 'https://functions.yandexcloud.net/d4evtdt6oq7jnc168ke0';
+        
+        // Глобальные переменные
         let metersData = null;
         let allDevices = [];
 
-        // Загрузка данных
+        // ============================================
+        // ЗАГРУЗКА ДАННЫХ
+        // ============================================
         async function loadData() {
             try {
                 const response = await fetch(API_URL);
@@ -350,7 +357,9 @@
             }
         }
 
-        // Обновление панели
+        // ============================================
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+        // ============================================
         function updateDashboard(data) {
             updateTable(data.devices || {});
             updateTotalStats(data.devices || {});
@@ -431,7 +440,9 @@
                 `📊 Всего: ${total} | ✅ Онлайн: ${online} | ⚡ ${totalConsumed.toFixed(0)} кВт·ч | 💰 ${totalCost.toFixed(0)} ₽`;
         }
 
-        // Экспорт в Excel
+        // ============================================
+        // ЭКСПОРТ В EXCEL
+        // ============================================
         function exportToExcel() {
             if (!metersData) return;
             
@@ -464,7 +475,9 @@
             XLSX.writeFile(wb, `meters_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // Экспорт в PDF
+        // ============================================
+        // ЭКСПОРТ В PDF
+        // ============================================
         function exportToPDF() {
             if (!metersData) return;
             
@@ -530,7 +543,9 @@
             doc.save(`meters_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
-        // Месячный отчет
+        // ============================================
+        // МЕСЯЧНЫЙ ОТЧЕТ
+        // ============================================
         function exportMonthlyReport() {
             if (!metersData || !metersData.all_data) return;
             
@@ -561,15 +576,19 @@
             XLSX.writeFile(wb, `monthly_report_${currentMonth}.xlsx`);
         }
 
-        // Ошибка загрузки
+        // ============================================
+        // ОШИБКА ЗАГРУЗКИ
+        // ============================================
         function showError() {
             document.getElementById('tableBody').innerHTML = 
                 '<tr><td colspan="10" style="color: #ef4444; text-align: center;">Ошибка загрузки данных</td></tr>';
         }
 
-        // Автообновление каждую минуту
-        loadData();
-        setInterval(loadData, 60000);
+        // ============================================
+        // АВТООБНОВЛЕНИЕ
+        // ============================================
+        loadData(); // Первая загрузка
+        setInterval(loadData, 60000); // Обновление каждую минуту
     </script>
 </body>
 </html>
