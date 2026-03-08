@@ -381,6 +381,9 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape');
             
+            // ПОДДЕРЖКА РУССКОГО ЯЗЫКА
+            doc.setFont("helvetica");
+            
             doc.setFontSize(18);
             doc.setTextColor(30, 60, 114);
             doc.text('Отчет по всем счетчикам', 14, 20);
@@ -402,8 +405,8 @@
                     initial.toFixed(1),
                     (dev.current || 0).toFixed(1),
                     (dev.consumed || 0).toFixed(1),
-                    (dev.price || 5).toFixed(2),
-                    cost.toFixed(0)
+                    (dev.price || 5).toFixed(2) + ' ₽',
+                    cost.toFixed(0) + ' ₽'
                 ]);
             }
             
@@ -411,17 +414,27 @@
                 head: [['ID', 'Место', 'Описание', 'Нач.', 'Тек.', 'Потр.', 'Цена', 'Сумма']],
                 body: tableData,
                 startY: 35,
-                headStyles: { fillColor: [30, 60, 114] },
-                styles: { fontSize: 8 },
+                headStyles: { 
+                    fillColor: [30, 60, 114],
+                    halign: 'center'
+                },
+                styles: { 
+                    fontSize: 8,
+                    font: "helvetica",
+                    cellPadding: 3
+                },
                 columnStyles: {
-                    0: { cellWidth: 20 },
+                    0: { cellWidth: 20, halign: 'center' },
                     1: { cellWidth: 30 },
                     2: { cellWidth: 40 },
-                    3: { cellWidth: 20 },
-                    4: { cellWidth: 20 },
-                    5: { cellWidth: 20 },
-                    6: { cellWidth: 15 },
-                    7: { cellWidth: 20 }
+                    3: { cellWidth: 20, halign: 'right' },
+                    4: { cellWidth: 20, halign: 'right' },
+                    5: { cellWidth: 20, halign: 'right' },
+                    6: { cellWidth: 20, halign: 'right' },
+                    7: { cellWidth: 20, halign: 'right' }
+                },
+                didDrawPage: function(data) {
+                    doc.setFont("helvetica");
                 }
             });
             
@@ -471,6 +484,8 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
+            doc.setFont("helvetica");
+            
             doc.setFontSize(18);
             doc.setTextColor(30, 60, 114);
             doc.text(`Счетчик ${currentDeviceId} - помесячно`, 14, 20);
@@ -499,8 +514,8 @@
                     initial.toFixed(1),
                     final.toFixed(1),
                     consumed.toFixed(1),
-                    price.toFixed(2),
-                    cost.toFixed(0)
+                    price.toFixed(2) + ' ₽',
+                    cost.toFixed(0) + ' ₽'
                 ]);
             }
             
@@ -508,14 +523,29 @@
                 head: [['Месяц', 'Начальные', 'Конечные', 'Потреблено', 'Цена', 'Стоимость']],
                 body: tableData,
                 startY: 35,
-                headStyles: { fillColor: [30, 60, 114] }
+                headStyles: { 
+                    fillColor: [30, 60, 114],
+                    halign: 'center'
+                },
+                styles: {
+                    font: "helvetica",
+                    fontSize: 9
+                },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 25, halign: 'right' },
+                    2: { cellWidth: 25, halign: 'right' },
+                    3: { cellWidth: 25, halign: 'right' },
+                    4: { cellWidth: 25, halign: 'right' },
+                    5: { cellWidth: 25, halign: 'right' }
+                }
             });
             
             doc.save(`meter_${currentDeviceId}_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
         checkAuth();
-        setInterval(loadData, 300000);
+        setInterval(loadData, 300000); // Обновление каждые 5 минут
     </script>
 </body>
 </html>
