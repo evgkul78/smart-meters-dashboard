@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Умные счетчики v3.1</title>
+    <title>Умные счетчики v3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
@@ -27,15 +27,14 @@
         .stat-value { font-size: 42px; font-weight: bold; color: #1e3c72; }
         .stat-label { color: #666; font-size: 16px; }
         
-        .export-buttons { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .export-buttons { display: flex; gap: 15px; margin-bottom: 25px; }
         .export-btn { padding: 12px 25px; border: none; border-radius: 30px; font-weight: 500; 
                      cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .export-btn.excel { background: #28a745; color: white; }
         .export-btn.pdf { background: #dc3545; color: white; }
-        .export-btn.refresh { background: #17a2b8; color: white; }
         
         .table-container { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; }
-        .table-header { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+        .table-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .meters-table { width: 100%; border-collapse: collapse; }
         .meters-table th { text-align: left; padding: 15px 10px; background: #1e3c72; color: white; }
         .meters-table td { padding: 12px 10px; border-bottom: 1px solid #e0e0e0; }
@@ -47,19 +46,15 @@
         
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
                 background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 1200px; width: 95%; 
-                        max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-tabs { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        .tab-btn { padding: 10px 20px; border: none; border-radius: 30px; background: #e0e0e0; cursor: pointer; }
-        .tab-btn.active { background: #1e3c72; color: white; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 900px; width: 90%; 
+                        max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .close-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; 
                     border-radius: 30px; cursor: pointer; }
-        
-        .chart-container { height: 300px; margin: 20px 0; }
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .data-table th { background: #4CAF50; color: white; padding: 10px; }
-        .data-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .month-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .month-table th { background: #4CAF50; color: white; padding: 10px; }
+        .month-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .month-table tr:nth-child(even) { background: #f9f9f9; }
         
         .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
                         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -76,8 +71,6 @@
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #1e3c72; border-radius: 50%;
                   width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .last-seen { font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -85,7 +78,7 @@
         <div class="login-box">
             <div class="login-title">
                 <h2>🔐 Вход в систему</h2>
-                <p>Учет электроэнергии</p>
+                <p>Учет электроэнергии v3.0</p>
             </div>
             <input type="text" class="login-input" id="loginUsername" placeholder="Логин" value="admin">
             <input type="password" class="login-input" id="loginPassword" placeholder="Пароль" value="admin123">
@@ -97,10 +90,10 @@
     <div class="container" id="mainContent" style="display: none;">
         <div class="header">
             <div class="logo">
-                <h1>⚡ УМНЫЕ СЧЕТЧИКИ <span>| Панель управления</span></h1>
+                <h1>⚡ УМНЫЕ СЧЕТЧИКИ <span>| v3.0</span></h1>
             </div>
             <div style="display: flex; align-items: center;">
-                <span class="admin-badge" id="liveStatus">🟢 Онлайн</span>
+                <span class="admin-badge">Администратор</span>
                 <button class="logout-btn" onclick="logout()">Выйти</button>
             </div>
         </div>
@@ -129,9 +122,8 @@
         </div>
 
         <div class="export-buttons">
-            <button class="export-btn excel" onclick="exportToExcel()">📥 Excel</button>
-            <button class="export-btn pdf" onclick="exportToPDF()">📥 PDF</button>
-            <button class="export-btn refresh" onclick="loadData()">🔄 Обновить</button>
+            <button class="export-btn excel" onclick="exportToExcel()">📥 Скачать Excel (все)</button>
+            <button class="export-btn pdf" onclick="exportToPDF()">📥 Скачать PDF (все)</button>
         </div>
 
         <div class="table-container">
@@ -145,25 +137,41 @@
                         <th>ID</th>
                         <th>Место</th>
                         <th>Описание</th>
+                        <th>Начальные</th>
                         <th>Текущие</th>
                         <th>Потреблено</th>
                         <th>Цена</th>
                         <th>Сумма</th>
                         <th>Статус</th>
-                        <th>Обновлено</th>
+                        <th>Последний</th>
                     </tr>
                 </thead>
                 <tbody id="metersTableBody">
-                    <tr><td colspan="9" class="loading"><div class="spinner"></div>Загрузка...</td></tr>
+                    <tr><td colspan="10" class="loading"><div class="spinner"></div>Загрузка...</td></tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Модальное окно для детализации по месяцам -->
+    <div class="modal" id="deviceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Счетчик </h2>
+                <button class="close-btn" onclick="closeModal()">Закрыть</button>
+            </div>
+            <div style="margin: 20px 0;">
+                <button class="export-btn excel" onclick="exportDeviceToExcel()" style="display: inline-block; margin-right: 10px;">📥 Excel</button>
+                <button class="export-btn pdf" onclick="exportDeviceToPDF()" style="display: inline-block;">📥 PDF</button>
+            </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://functions.yandexcloud.net/d4evtdt6oq7jnc168ke0';
         let metersData = null;
-        let chart = null;
+        let currentDeviceId = null;
 
         function login() {
             const username = document.getElementById('loginUsername').value;
@@ -172,7 +180,6 @@
             if (username === 'admin' && password === 'admin123') {
                 localStorage.setItem('auth', btoa('admin:admin123'));
                 loadData();
-                setInterval(loadData, 60000);
             } else {
                 document.getElementById('loginError').style.display = 'block';
                 document.getElementById('loginError').textContent = 'Неверный логин или пароль';
@@ -188,7 +195,6 @@
         function checkAuth() {
             if (localStorage.getItem('auth')) {
                 loadData();
-                setInterval(loadData, 60000);
             } else {
                 document.getElementById('loginOverlay').style.display = 'flex';
             }
@@ -197,6 +203,7 @@
         async function loadData() {
             try {
                 const response = await fetch(API_URL, {
+                    method: 'GET',
                     headers: {
                         'Authorization': 'Basic ' + localStorage.getItem('auth')
                     }
@@ -213,14 +220,12 @@
                 
                 document.getElementById('lastUpdate').textContent = 
                     'Обновлено: ' + new Date().toLocaleString('ru-RU');
-                document.getElementById('liveStatus').textContent = '🟢 Онлайн ' + new Date().toLocaleTimeString();
                 
                 document.getElementById('mainContent').style.display = 'block';
                 document.getElementById('loginOverlay').style.display = 'none';
                 
             } catch (error) {
                 console.error(error);
-                document.getElementById('liveStatus').textContent = '🔴 Ошибка';
             }
         }
 
@@ -244,62 +249,130 @@
             document.getElementById('totalDevices').textContent = Object.keys(data.devices).length || 0;
             document.getElementById('onlineDevices').textContent = online;
             
-            updateTable(data.devices || {});
+            updateTable(data.devices || {}, data.months || {});
         }
 
-        function updateTable(devices) {
+        function getInitialForDevice(deviceId, months) {
+            const currentMonth = new Date().toISOString().slice(0,7);
+            if (months[currentMonth]) {
+                const records = months[currentMonth].filter(r => r.device_id === deviceId);
+                if (records.length > 0) {
+                    return records[0].current - records[0].consumed;
+                }
+            }
+            return 0;
+        }
+
+        function updateTable(devices, months) {
             let html = '';
             const now = new Date();
             
             for (let id in devices) {
                 const dev = devices[id];
-                const cost = (dev.consumed || 0) * (dev.price || 5);
+                const initial = getInitialForDevice(id, months);
+                const current = dev.current || 0;
+                const consumed = dev.consumed || 0;
+                const price = dev.price || 5;
+                const cost = consumed * price;
                 
                 const lastSeen = new Date(dev.timestamp || 0);
                 const isOnline = (now - lastSeen) < 30 * 60 * 1000;
-                const minutesAgo = Math.round((now - lastSeen) / 60000);
                 
                 html += `<tr>
                     <td><span class="device-id" onclick="showDeviceDetails('${id}')">${id}</span></td>
                     <td>${dev.location || '-'}</td>
                     <td>${dev.description || '-'}</td>
-                    <td><b>${(dev.current || 0).toFixed(1)}</b></td>
-                    <td>${(dev.consumed || 0).toFixed(1)}</td>
-                    <td><span class="price-badge">${(dev.price || 5).toFixed(2)} ₽</span></td>
+                    <td>${initial.toFixed(1)}</td>
+                    <td><b>${current.toFixed(1)}</b></td>
+                    <td>${consumed.toFixed(1)}</td>
+                    <td><span class="price-badge">${price.toFixed(2)} ₽</span></td>
                     <td><b>${cost.toFixed(0)} ₽</b></td>
                     <td><span class="${isOnline ? 'online' : 'offline'}">${isOnline ? '● Онлайн' : '○ Офлайн'}</span></td>
-                    <td>${minutesAgo} мин</td>
+                    <td>${dev.timestamp ? dev.timestamp.slice(0,16) : '-'}</td>
                 </tr>`;
+            }
+            
+            if (html === '') {
+                html = '<tr><td colspan="10" style="text-align: center; padding: 30px;">Нет данных</td></tr>';
             }
             
             document.getElementById('metersTableBody').innerHTML = html;
         }
 
+        function showDeviceDetails(deviceId) {
+            currentDeviceId = deviceId;
+            document.getElementById('modalTitle').textContent = `Счетчик ${deviceId} - детализация по месяцам`;
+            
+            let html = '<table class="month-table"><tr><th>Месяц</th><th>Начальные</th><th>Конечные</th><th>Потреблено</th><th>Цена</th><th>Стоимость</th></tr>';
+            
+            const months = Object.keys(metersData.months || {}).sort().reverse();
+            
+            for (let month of months) {
+                const records = metersData.months[month].filter(r => r.device_id === deviceId);
+                if (records.length === 0) continue;
+                
+                records.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                
+                const first = records[0];
+                const last = records[records.length - 1];
+                const initial = first.current - first.consumed;
+                const final = last.current;
+                const consumed = final - initial;
+                const price = last.price || 5;
+                const cost = consumed * price;
+                
+                html += `<tr>
+                    <td><b>${month}</b></td>
+                    <td>${initial.toFixed(1)}</td>
+                    <td>${final.toFixed(1)}</td>
+                    <td><b>${consumed.toFixed(1)}</b></td>
+                    <td>${price.toFixed(2)} ₽</td>
+                    <td><b>${cost.toFixed(0)} ₽</b></td>
+                </tr>`;
+            }
+            
+            html += '</table>';
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('deviceModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('deviceModal').style.display = 'none';
+        }
+
         function exportToExcel() {
             if (!metersData) return;
             
-            const data = [['ID', 'Место', 'Описание', 'Текущие', 'Потреблено', 'Цена', 'Сумма', 'Статус']];
+            const data = [['ID', 'Место', 'Описание', 'Начальные', 'Текущие', 'Потреблено', 'Цена', 'Стоимость', 'Статус', 'Последний сигнал']];
+            
+            const now = new Date();
             
             for (let id in metersData.devices) {
                 const dev = metersData.devices[id];
+                const initial = getInitialForDevice(id, metersData.months);
                 const cost = (dev.consumed || 0) * (dev.price || 5);
+                
+                const lastSeen = new Date(dev.timestamp || 0);
+                const isOnline = (now - lastSeen) < 30 * 60 * 1000;
                 
                 data.push([
                     id,
                     dev.location || '-',
                     dev.description || '-',
+                    initial.toFixed(1),
                     (dev.current || 0).toFixed(1),
                     (dev.consumed || 0).toFixed(1),
                     (dev.price || 5).toFixed(2),
                     cost.toFixed(0),
-                    'Активен'
+                    isOnline ? 'Онлайн' : 'Офлайн',
+                    dev.timestamp || '-'
                 ]);
             }
             
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, 'Счетчики');
-            XLSX.writeFile(wb, `meters_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, `meters_all_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
         function exportToPDF() {
@@ -310,19 +383,23 @@
             
             doc.setFontSize(18);
             doc.setTextColor(30, 60, 114);
-            doc.text('Отчет по счетчикам', 14, 20);
+            doc.text('Отчет по всем счетчикам', 14, 20);
             doc.setFontSize(10);
             doc.text('Дата: ' + new Date().toLocaleString('ru-RU'), 14, 28);
             
             const tableData = [];
+            const now = new Date();
+            
             for (let id in metersData.devices) {
                 const dev = metersData.devices[id];
+                const initial = getInitialForDevice(id, metersData.months);
                 const cost = (dev.consumed || 0) * (dev.price || 5);
                 
                 tableData.push([
                     id,
                     dev.location || '-',
                     dev.description || '-',
+                    initial.toFixed(1),
                     (dev.current || 0).toFixed(1),
                     (dev.consumed || 0).toFixed(1),
                     (dev.price || 5).toFixed(2),
@@ -331,16 +408,114 @@
             }
             
             doc.autoTable({
-                head: [['ID', 'Место', 'Описание', 'Текущие', 'Потреблено', 'Цена', 'Сумма']],
+                head: [['ID', 'Место', 'Описание', 'Нач.', 'Тек.', 'Потр.', 'Цена', 'Сумма']],
+                body: tableData,
+                startY: 35,
+                headStyles: { fillColor: [30, 60, 114] },
+                styles: { fontSize: 8 },
+                columnStyles: {
+                    0: { cellWidth: 20 },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 40 },
+                    3: { cellWidth: 20 },
+                    4: { cellWidth: 20 },
+                    5: { cellWidth: 20 },
+                    6: { cellWidth: 15 },
+                    7: { cellWidth: 20 }
+                }
+            });
+            
+            doc.save(`meters_all_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        function exportDeviceToExcel() {
+            if (!currentDeviceId || !metersData) return;
+            
+            const data = [['Месяц', 'Начальные', 'Конечные', 'Потреблено', 'Цена', 'Стоимость']];
+            
+            const months = Object.keys(metersData.months || {}).sort().reverse();
+            
+            for (let month of months) {
+                const records = metersData.months[month].filter(r => r.device_id === currentDeviceId);
+                if (records.length === 0) continue;
+                
+                records.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                
+                const first = records[0];
+                const last = records[records.length - 1];
+                const initial = first.current - first.consumed;
+                const final = last.current;
+                const consumed = final - initial;
+                const price = last.price || 5;
+                const cost = consumed * price;
+                
+                data.push([
+                    month,
+                    initial.toFixed(1),
+                    final.toFixed(1),
+                    consumed.toFixed(1),
+                    price.toFixed(2),
+                    cost.toFixed(0)
+                ]);
+            }
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, `Счетчик ${currentDeviceId}`);
+            XLSX.writeFile(wb, `meter_${currentDeviceId}_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function exportDeviceToPDF() {
+            if (!currentDeviceId || !metersData) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.setTextColor(30, 60, 114);
+            doc.text(`Счетчик ${currentDeviceId} - помесячно`, 14, 20);
+            doc.setFontSize(10);
+            doc.text('Дата: ' + new Date().toLocaleString('ru-RU'), 14, 28);
+            
+            const tableData = [];
+            const months = Object.keys(metersData.months || {}).sort().reverse();
+            
+            for (let month of months) {
+                const records = metersData.months[month].filter(r => r.device_id === currentDeviceId);
+                if (records.length === 0) continue;
+                
+                records.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                
+                const first = records[0];
+                const last = records[records.length - 1];
+                const initial = first.current - first.consumed;
+                const final = last.current;
+                const consumed = final - initial;
+                const price = last.price || 5;
+                const cost = consumed * price;
+                
+                tableData.push([
+                    month,
+                    initial.toFixed(1),
+                    final.toFixed(1),
+                    consumed.toFixed(1),
+                    price.toFixed(2),
+                    cost.toFixed(0)
+                ]);
+            }
+            
+            doc.autoTable({
+                head: [['Месяц', 'Начальные', 'Конечные', 'Потреблено', 'Цена', 'Стоимость']],
                 body: tableData,
                 startY: 35,
                 headStyles: { fillColor: [30, 60, 114] }
             });
             
-            doc.save(`meters_${new Date().toISOString().slice(0,10)}.pdf`);
+            doc.save(`meter_${currentDeviceId}_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
         checkAuth();
+        setInterval(loadData, 300000);
     </script>
 </body>
 </html>
