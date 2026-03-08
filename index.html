@@ -56,65 +56,6 @@
             font-weight: 500;
         }
 
-        /* Карточки городов */
-        .cities-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .city-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transition: transform 0.2s;
-        }
-
-        .city-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .city-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .city-icon {
-            font-size: 24px;
-        }
-
-        .city-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .city-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
         /* Кнопки экспорта */
         .export-buttons {
             display: flex;
@@ -133,6 +74,14 @@
             gap: 8px;
             font-size: 14px;
             transition: all 0.2s;
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
 
         .export-btn.excel {
@@ -143,11 +92,6 @@
         .export-btn.pdf {
             background: #dc3545;
             color: white;
-        }
-
-        .export-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
         }
 
         /* Таблица */
@@ -171,19 +115,17 @@
             color: #1e293b;
         }
 
-        .filter-select {
+        .filter-input {
             padding: 10px 20px;
             border: 2px solid #e2e8f0;
             border-radius: 30px;
             font-size: 14px;
-            color: #1e293b;
-            background: white;
-            cursor: pointer;
+            width: 300px;
             outline: none;
             transition: border-color 0.2s;
         }
 
-        .filter-select:focus {
+        .filter-input:focus {
             border-color: #667eea;
         }
 
@@ -226,19 +168,19 @@
             font-size: 13px;
         }
 
-        .location-info {
-            display: flex;
-            flex-direction: column;
+        .location-cell {
+            max-width: 250px;
         }
 
-        .city-tag {
-            font-weight: 600;
+        .location-text {
+            font-weight: 500;
             color: #1e293b;
         }
 
-        .address {
+        .description-text {
             font-size: 12px;
             color: #64748b;
+            margin-top: 2px;
         }
 
         .status-online {
@@ -270,6 +212,15 @@
             color: #059669;
         }
 
+        .price-badge {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -299,16 +250,16 @@
         }
 
         @media (max-width: 768px) {
-            .cities-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .export-buttons {
                 flex-direction: column;
             }
             
+            .filter-input {
+                width: 100%;
+            }
+            
             table {
-                font-size: 13px;
+                font-size: 12px;
             }
             
             td, th {
@@ -329,58 +280,6 @@
             </div>
         </div>
 
-        <!-- Карточки городов (ровно 3) -->
-        <div class="cities-grid" id="citiesGrid">
-            <div class="city-card">
-                <div class="city-header">
-                    <span class="city-icon">🏙️</span>
-                    <span class="city-name">Москва</span>
-                </div>
-                <div class="city-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="mskCount">0</div>
-                        <div class="stat-label">счетчиков</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="mskConsumed">0</div>
-                        <div class="stat-label">кВт·ч</div>
-                    </div>
-                </div>
-            </div>
-            <div class="city-card">
-                <div class="city-header">
-                    <span class="city-icon">🏭</span>
-                    <span class="city-name">Санкт-Петербург</span>
-                </div>
-                <div class="city-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="spbCount">0</div>
-                        <div class="stat-label">счетчиков</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="spbConsumed">0</div>
-                        <div class="stat-label">кВт·ч</div>
-                    </div>
-                </div>
-            </div>
-            <div class="city-card">
-                <div class="city-header">
-                    <span class="city-icon">🏡</span>
-                    <span class="city-name">Казань</span>
-                </div>
-                <div class="city-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="kznCount">0</div>
-                        <div class="stat-label">счетчиков</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="kznConsumed">0</div>
-                        <div class="stat-label">кВт·ч</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Кнопки экспорта -->
         <div class="export-buttons">
             <button class="export-btn excel" onclick="exportToExcel()">
@@ -389,37 +288,36 @@
             <button class="export-btn pdf" onclick="exportToPDF()">
                 <span>📥</span> Скачать PDF (все показания)
             </button>
+            <button class="export-btn" onclick="exportMonthlyReport()">
+                <span>📊</span> Отчет за месяц
+            </button>
         </div>
 
         <!-- Таблица счетчиков -->
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">📋 Текущие показания счетчиков</div>
-                <select class="filter-select" id="cityFilter" onchange="filterByCity()">
-                    <option value="all">Все города</option>
-                    <option value="Город-1">Город-1</option>
-                    <option value="Город-2">Город-2</option>
-                    <option value="Город-3">Город-3</option>
-                </select>
+                <input type="text" class="filter-input" id="searchFilter" placeholder="🔍 Поиск по адресу или описанию..." onkeyup="filterTable()">
             </div>
             <div style="overflow-x: auto;">
                 <table id="metersTable">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Город</th>
-                            <th>Адрес</th>
-                            <th>Помещение</th>
+                            <th>Местоположение</th>
+                            <th>Описание</th>
                             <th>Начальные</th>
                             <th>Текущие</th>
                             <th>Потреблено</th>
+                            <th>Цена</th>
+                            <th>Стоимость</th>
                             <th>Статус</th>
                             <th>Последнее</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="9" class="loading">
+                            <td colspan="10" class="loading">
                                 <div class="spinner"></div>
                                 Загрузка данных...
                             </td>
@@ -452,131 +350,109 @@
             }
         }
 
-        // Обновление всей панели
+        // Обновление панели
         function updateDashboard(data) {
-            updateCityStats(data.devices || {});
             updateTable(data.devices || {});
             updateTotalStats(data.devices || {});
-        }
-
-        // Обновление статистики по городам
-        function updateCityStats(devices) {
-            let mskCount = 0, mskConsumed = 0;
-            let spbCount = 0, spbConsumed = 0;
-            let kznCount = 0, kznConsumed = 0;
-            
-            for (let id in devices) {
-                const dev = devices[id];
-                const location = dev.location || '';
-                
-                if (location.includes('Город-1')) {
-                    mskCount++;
-                    mskConsumed += dev.consumed || 0;
-                } else if (location.includes('Город-2') || location.includes('Питер')) {
-                    spbCount++;
-                    spbConsumed += dev.consumed || 0;
-                } else if (location.includes('Город-3')) {
-                    kznCount++;
-                    kznConsumed += dev.consumed || 0;
-                }
-            }
-            
-            document.getElementById('mskCount').textContent = mskCount;
-            document.getElementById('mskConsumed').textContent = mskConsumed.toFixed(1);
-            document.getElementById('spbCount').textContent = spbCount;
-            document.getElementById('spbConsumed').textContent = spbConsumed.toFixed(1);
-            document.getElementById('kznCount').textContent = kznCount;
-            document.getElementById('kznConsumed').textContent = kznConsumed.toFixed(1);
         }
 
         // Обновление таблицы
         function updateTable(devices) {
             const tbody = document.getElementById('tableBody');
-            const filter = document.getElementById('cityFilter').value;
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
             const now = new Date();
             
             let html = '';
             
             for (let id in devices) {
                 const dev = devices[id];
-                const location = dev.location || '';
                 
-                // Фильтр по городу
-                if (filter !== 'all') {
-                    if (!location.includes(filter)) continue;
-                }
+                // Поиск по адресу или описанию
+                const locationMatch = (dev.location || '').toLowerCase().includes(searchTerm);
+                const descMatch = (dev.description || '').toLowerCase().includes(searchTerm);
+                if (searchTerm && !locationMatch && !descMatch) continue;
                 
                 const lastSeen = new Date(dev.timestamp);
                 const isOnline = (now - lastSeen) < 30 * 60 * 1000; // 30 минут
                 
-                // Разбираем адрес
-                const locationParts = location.split(',');
-                const city = locationParts[0] || '-';
-                const address = locationParts.slice(1).join(',').trim() || '-';
+                const consumed = dev.consumed || 0;
+                const price = dev.price || 5;
+                const cost = consumed * price;
                 
                 html += `<tr>
                     <td><span class="device-id">${id}</span></td>
-                    <td><span class="city-tag">${city}</span></td>
-                    <td>${address}</td>
-                    <td>${dev.description || '-'}</td>
+                    <td class="location-cell">
+                        <div class="location-text">${dev.location || '-'}</div>
+                    </td>
+                    <td>
+                        <div class="description-text">${dev.description || '-'}</div>
+                    </td>
                     <td>${(dev.initial || 0).toFixed(1)}</td>
                     <td><b>${(dev.current || 0).toFixed(1)}</b></td>
-                    <td><span class="consumed-value">${(dev.consumed || 0).toFixed(1)}</span></td>
+                    <td><span class="consumed-value">${consumed.toFixed(1)}</span></td>
+                    <td><span class="price-badge">${price.toFixed(2)} ₽</span></td>
+                    <td><b>${cost.toFixed(0)} ₽</b></td>
                     <td><span class="${isOnline ? 'status-online' : 'status-offline'}">${isOnline ? 'Онлайн' : 'Офлайн'}</span></td>
                     <td>${dev.timestamp ? dev.timestamp.slice(0,16) : '-'}</td>
                 </tr>`;
             }
             
             if (html === '') {
-                html = '<tr><td colspan="9" style="text-align: center; padding: 30px;">Нет данных для отображения</td></tr>';
+                html = '<tr><td colspan="10" style="text-align: center; padding: 30px;">Нет данных для отображения</td></tr>';
             }
             
             tbody.innerHTML = html;
         }
 
-        // Обновление общей статистики
+        // Фильтр таблицы
+        function filterTable() {
+            if (metersData) {
+                updateTable(metersData.devices || {});
+            }
+        }
+
+        // Общая статистика
         function updateTotalStats(devices) {
             const total = Object.keys(devices).length;
             const online = Object.values(devices).filter(d => {
                 return (new Date() - new Date(d.timestamp)) < 30 * 60 * 1000;
             }).length;
             
-            document.getElementById('totalStats').innerHTML = 
-                `📊 Всего: ${total} счетчиков | ✅ Онлайн: ${online}`;
-        }
-
-        // Фильтр по городу
-        function filterByCity() {
-            if (metersData) {
-                updateTable(metersData.devices || {});
+            let totalConsumed = 0;
+            let totalCost = 0;
+            
+            for (let id in devices) {
+                const dev = devices[id];
+                totalConsumed += dev.consumed || 0;
+                totalCost += (dev.consumed || 0) * (dev.price || 5);
             }
+            
+            document.getElementById('totalStats').innerHTML = 
+                `📊 Всего: ${total} | ✅ Онлайн: ${online} | ⚡ ${totalConsumed.toFixed(0)} кВт·ч | 💰 ${totalCost.toFixed(0)} ₽`;
         }
 
         // Экспорт в Excel
         function exportToExcel() {
             if (!metersData) return;
             
-            const data = [['ID', 'Город', 'Адрес', 'Помещение', 'Начальные', 'Текущие', 'Потреблено', 'Статус', 'Последнее обновление']];
+            const data = [['ID', 'Местоположение', 'Описание', 'Начальные', 'Текущие', 'Потреблено', 'Цена', 'Стоимость', 'Статус', 'Последнее обновление']];
             const now = new Date();
             
             for (let id in metersData.devices) {
                 const dev = metersData.devices[id];
-                const location = dev.location || '';
-                const locationParts = location.split(',');
-                const city = locationParts[0] || '-';
-                const address = locationParts.slice(1).join(',').trim() || '-';
-                
                 const lastSeen = new Date(dev.timestamp);
                 const isOnline = (now - lastSeen) < 30 * 60 * 1000;
+                const cost = (dev.consumed || 0) * (dev.price || 5);
                 
                 data.push([
                     id,
-                    city,
-                    address,
+                    dev.location || '-',
                     dev.description || '-',
                     (dev.initial || 0).toFixed(1),
                     (dev.current || 0).toFixed(1),
                     (dev.consumed || 0).toFixed(1),
+                    (dev.price || 5).toFixed(2),
+                    cost.toFixed(0),
                     isOnline ? 'Онлайн' : 'Офлайн',
                     dev.timestamp || '-'
                 ]);
@@ -609,28 +485,24 @@
             
             for (let id in metersData.devices) {
                 const dev = metersData.devices[id];
-                const location = dev.location || '';
-                const locationParts = location.split(',');
-                const city = locationParts[0] || '-';
-                const address = locationParts.slice(1).join(',').trim() || '-';
-                
-                const lastSeen = new Date(dev.timestamp);
-                const isOnline = (now - lastSeen) < 30 * 60 * 1000;
+                const isOnline = (now - new Date(dev.timestamp)) < 30 * 60 * 1000;
+                const cost = (dev.consumed || 0) * (dev.price || 5);
                 
                 tableData.push([
                     id,
-                    city,
-                    address,
+                    dev.location || '-',
                     dev.description || '-',
                     (dev.initial || 0).toFixed(1),
                     (dev.current || 0).toFixed(1),
                     (dev.consumed || 0).toFixed(1),
+                    (dev.price || 5).toFixed(2) + '₽',
+                    cost.toFixed(0) + '₽',
                     isOnline ? 'Онлайн' : 'Офлайн'
                 ]);
             }
             
             doc.autoTable({
-                head: [['ID', 'Город', 'Адрес', 'Помещение', 'Нач.', 'Тек.', 'Потр.', 'Статус']],
+                head: [['ID', 'Местоположение', 'Описание', 'Нач.', 'Тек.', 'Потр.', 'Цена', 'Сумма', 'Статус']],
                 body: tableData,
                 startY: 35,
                 headStyles: { 
@@ -643,24 +515,56 @@
                     cellPadding: 3
                 },
                 columnStyles: {
-                    0: { cellWidth: 20, halign: 'center' },
-                    1: { cellWidth: 30 },
-                    2: { cellWidth: 50 },
-                    3: { cellWidth: 30 },
-                    4: { cellWidth: 20, halign: 'right' },
-                    5: { cellWidth: 20, halign: 'right' },
-                    6: { cellWidth: 20, halign: 'right' },
-                    7: { cellWidth: 25, halign: 'center' }
+                    0: { cellWidth: 15, halign: 'center' },
+                    1: { cellWidth: 45 },
+                    2: { cellWidth: 35 },
+                    3: { cellWidth: 18, halign: 'right' },
+                    4: { cellWidth: 18, halign: 'right' },
+                    5: { cellWidth: 18, halign: 'right' },
+                    6: { cellWidth: 18, halign: 'right' },
+                    7: { cellWidth: 18, halign: 'right' },
+                    8: { cellWidth: 20, halign: 'center' }
                 }
             });
             
             doc.save(`meters_${new Date().toISOString().slice(0,10)}.pdf`);
         }
 
+        // Месячный отчет
+        function exportMonthlyReport() {
+            if (!metersData || !metersData.all_data) return;
+            
+            const data = [['ID', 'Местоположение', 'Описание', 'Дата', 'Показания', 'Потреблено', 'Цена', 'Стоимость']];
+            
+            // Берем данные за текущий месяц
+            const currentMonth = new Date().toISOString().slice(0,7);
+            
+            metersData.all_data.forEach(record => {
+                if (record.timestamp.slice(0,7) === currentMonth) {
+                    const cost = record.consumed * record.price;
+                    data.push([
+                        record.device_id,
+                        record.location || '-',
+                        record.description || '-',
+                        record.timestamp.slice(0,10),
+                        record.current.toFixed(1),
+                        record.consumed.toFixed(1),
+                        record.price.toFixed(2),
+                        cost.toFixed(0)
+                    ]);
+                }
+            });
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, `Месяц ${currentMonth}`);
+            XLSX.writeFile(wb, `monthly_report_${currentMonth}.xlsx`);
+        }
+
         // Ошибка загрузки
         function showError() {
             document.getElementById('tableBody').innerHTML = 
-                '<tr><td colspan="9" style="color: #ef4444; text-align: center;">Ошибка загрузки данных</td></tr>';
+                '<tr><td colspan="10" style="color: #ef4444; text-align: center;">Ошибка загрузки данных</td></tr>';
         }
 
         // Автообновление каждую минуту
